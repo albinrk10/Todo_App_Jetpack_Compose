@@ -64,7 +64,7 @@ androidx-foundation-layout-android = { group = "androidx.compose.foundation", na
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationComposeVersion" }
 
 # AI (MediaPipe GenAI / On-Device LLM)
-mediapipe-genai = { module = "com.google.mediapipe:tasks-genai", version = "0.10.14" }
+mediapipe-genai = { module = "com.google.mediapipe:tasks-genai", version = "0.10.29" }
 
 # Testing
 junit = { module = "junit:junit", version.ref = "junit" }
