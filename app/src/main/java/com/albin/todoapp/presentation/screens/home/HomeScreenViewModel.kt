@@ -6,85 +6,79 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.albin.todoapp.core.util.DateTimeUtils
 import com.albin.todoapp.domain.TaskLocalDataSource
+import com.albin.todoapp.presentation.screens.home.interactor.HomeUiEffect
+import com.albin.todoapp.presentation.screens.home.interactor.HomeUiIntent
+import com.albin.todoapp.presentation.screens.home.interactor.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val taskLocalDataSource: TaskLocalDataSource
-):ViewModel() {
+) : ViewModel() {
 
-
-
-    var state by   mutableStateOf(HomeDataState())
+    var state by mutableStateOf(HomeUiState())
         private set
 
-    private val eventChannel = Channel<HomeScreenEvent>()
-    val events = eventChannel.receiveAsFlow()
+    private val effectChannel = Channel<HomeUiEffect>()
+    val effects = effectChannel.receiveAsFlow()
+
+    // Compatibilidad para observers existentes de events
+    val events = effects
 
     init {
         state = state.copy(
-            date = LocalDate.now().let {
-                DateTimeFormatter.ofPattern("EEE, MMMM dd yyyy").format(it)
-            }
+            date = DateTimeUtils.formatCapitalizedFullDate()
         )
-        taskLocalDataSource.tasksFlow.onEach {
-            val completedTasks = it
-                .filter { task -> task.isCompleted }
-                .sortedByDescending { task ->
-                    task.date
-                }
-            val pendingTasks = it
-                .filter { task -> !task.isCompleted }
-                .sortedByDescending { task ->
-                    task.date
-                }
+        taskLocalDataSource.tasksFlow.onEach { tasks ->
+            val completedTasks = tasks
+                .filter { it.isCompleted }
+                .sortedByDescending { it.date }
+            val pendingTasks = tasks
+                .filter { !it.isCompleted }
+                .sortedByDescending { it.date }
 
             state = state.copy(
                 date = state.date,
                 summary = pendingTasks.size.toString(),
                 completedTask = completedTasks,
-                pendingTask = pendingTasks,
-
+                pendingTask = pendingTasks
             )
         }.launchIn(viewModelScope)
-
     }
 
-    fun onAction(action: HomeScreenAction) {
+    fun onIntent(intent: HomeUiIntent) {
         viewModelScope.launch {
-            when(action) {
-
-                is HomeScreenAction.OnDeleteAllTasks -> { //OnDeleteAllTasks
+            when (intent) {
+                is HomeUiIntent.OnDeleteAllTasks -> {
                     taskLocalDataSource.removeAllTasks()
-                    eventChannel.send(HomeScreenEvent.AllTaskDeleted)
-
-                }
-                is HomeScreenAction.OnDeleteTask -> { //OnDeleteTask
-                    taskLocalDataSource.removeTask(action.task)
-                    eventChannel.send(HomeScreenEvent.DeletedTask)
+                    effectChannel.send(HomeUiEffect.AllTaskDeleted)
                 }
 
-               is HomeScreenAction.OnToggleTask -> { //OnToggleTask
-                 val updatedTask = action.task.copy(isCompleted = !action.task.isCompleted)
+                is HomeUiIntent.OnDeleteTask -> {
+                    taskLocalDataSource.removeTask(intent.task)
+                    effectChannel.send(HomeUiEffect.DeletedTask)
+                }
+
+                is HomeUiIntent.OnToggleTask -> {
+                    val updatedTask = intent.task.copy(isCompleted = !intent.task.isCompleted)
                     taskLocalDataSource.updateTask(updatedTask)
-                   eventChannel.send(HomeScreenEvent.UpdatedTask)
-
+                    effectChannel.send(HomeUiEffect.UpdatedTask)
                 }
 
-                else-> Unit
+                else -> Unit
             }
         }
-
     }
 
+    // Alias para compatibilidad de llamada
+    fun onAction(action: HomeUiIntent) = onIntent(action)
 }

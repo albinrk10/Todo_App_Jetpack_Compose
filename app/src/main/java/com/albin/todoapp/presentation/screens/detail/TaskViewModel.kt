@@ -1,4 +1,5 @@
 package com.albin.todoapp.presentation.screens.detail
+
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,45 +12,50 @@ import androidx.navigation.toRoute
 import com.albin.todoapp.domain.Task
 import com.albin.todoapp.domain.TaskLocalDataSource
 import com.albin.todoapp.presentation.navigation.TaskScreenDes
+import com.albin.todoapp.presentation.screens.detail.interactor.TaskDetailUiEffect
+import com.albin.todoapp.presentation.screens.detail.interactor.TaskDetailUiIntent
+import com.albin.todoapp.presentation.screens.detail.interactor.TaskDetailUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskViewModel @Inject constructor (
+class TaskViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val localDataSource: TaskLocalDataSource
-): ViewModel() {
+) : ViewModel() {
 
-
-
-    var state by mutableStateOf(TaskScreenState())
+    var state by mutableStateOf(TaskDetailUiState())
         private set
 
-    private var eventChannel = Channel<TaskEvent>()
+    private var effectChannel = Channel<TaskDetailUiEffect>()
+    val effects = effectChannel.receiveAsFlow()
 
-    val event = eventChannel.receiveAsFlow()
+    // Compatibilidad para observers de event
+    val event = effects
+
     private val canSaveTask = snapshotFlow { state.taskName.text.toString() }
-    private val taskData= savedStateHandle.toRoute<TaskScreenDes>()
+    private val taskData = savedStateHandle.toRoute<TaskScreenDes>()
 
     private var editedTask: Task? = null
 
     init {
-
         taskData.taskId?.let {
             viewModelScope.launch {
                 localDataSource.getTaskById(taskData.taskId)?.let { task ->
-                    editedTask= task
+                    editedTask = task
                     state = state.copy(
                         taskName = TextFieldState(task.title),
-                        taskDescription = TextFieldState(task.description?:""),
+                        taskDescription = TextFieldState(task.description ?: ""),
                         isTaskDone = task.isCompleted,
-                        category = task.category
+                        category = task.category,
+                        date = task.date
                     )
                 }
             }
@@ -60,47 +66,48 @@ class TaskViewModel @Inject constructor (
         }.launchIn(viewModelScope)
     }
 
-    fun onAction(action: ActionTask) {
+    fun onIntent(intent: TaskDetailUiIntent) {
         viewModelScope.launch {
-            when (action) {
-
-                is ActionTask.ChangeTaskCategory -> {
-                    state = state.copy(category = action.category)
+            when (intent) {
+                is TaskDetailUiIntent.ChangeTaskCategory -> {
+                    state = state.copy(category = intent.category)
                 }
-                is ActionTask.ChangeTaskDone -> {
-                    state = state.copy(isTaskDone = action.isTaskDone)
+                is TaskDetailUiIntent.ChangeTaskDone -> {
+                    state = state.copy(isTaskDone = intent.isTaskDone)
                 }
-                is ActionTask.SaveTask -> {
-
+                is TaskDetailUiIntent.ChangeTaskDateTime -> {
+                    state = state.copy(date = intent.dateTime)
+                }
+                is TaskDetailUiIntent.SaveTask -> {
+                    val targetDate = state.date ?: LocalDateTime.now().plusHours(1)
                     editedTask?.let {
                         localDataSource.updateTask(
-                            updatedTask= it.copy(
+                            updatedTask = it.copy(
                                 id = it.id,
                                 title = state.taskName.text.toString(),
                                 description = state.taskDescription.text.toString(),
                                 isCompleted = state.isTaskDone,
-                                category = state.category
+                                category = state.category,
+                                date = targetDate
                             )
                         )
-                    }?:run {
-                        val task= Task(
-                            id =UUID.randomUUID().toString(),
+                    } ?: run {
+                        val task = Task(
+                            id = UUID.randomUUID().toString(),
                             title = state.taskName.text.toString(),
                             description = state.taskDescription.text.toString(),
                             isCompleted = state.isTaskDone,
-                            category = state.category
+                            category = state.category,
+                            date = targetDate
                         )
-                        localDataSource.addTask(
-                            task = task
-                        )
+                        localDataSource.addTask(task = task)
                     }
-                    eventChannel.send(TaskEvent.TaskCreated)
+                    effectChannel.send(TaskDetailUiEffect.TaskCreated)
                 }
                 else -> Unit
             }
         }
     }
 
-
-
+    fun onAction(action: TaskDetailUiIntent) = onIntent(action)
 }

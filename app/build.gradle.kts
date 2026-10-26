@@ -28,6 +28,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -91,5 +94,14 @@ dependencies {
     //Libreria Serializacion
 
     implementation(libs.kotlinx.serialization.json)
+
+    // AI (On-Device LLM Inference)
+    implementation(libs.mediapipe.genai)
+
+    // Unit Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.mockk)
 
 }

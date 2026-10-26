@@ -17,6 +17,10 @@ room = "2.6.1"
 uiTextGoogleFonts = "1.7.5"
 foundationLayoutAndroid = "1.6.6"
 navigationComposeVersion = "2.8.6"
+litertlm = "0.18.0"
+junit = "4.13.2"
+turbine = "1.1.0"
+mockk = "1.13.10"
 
 
 [libraries]
@@ -58,6 +62,15 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationComposeVersion" }
+
+# AI (MediaPipe GenAI / On-Device LLM)
+mediapipe-genai = { module = "com.google.mediapipe:tasks-genai", version = "0.10.14" }
+
+# Testing
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

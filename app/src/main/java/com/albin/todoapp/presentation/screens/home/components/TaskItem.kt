@@ -20,11 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
+
 import androidx.compose.ui.unit.dp
 import com.albin.todoapp.domain.Task
-import com.albin.todoapp.presentation.screens.home.providers.TaskItemPreviewProvider
-import com.albin.todoapp.ui.theme.TodoAppTheme
+import com.albin.todoapp.domain.Category
+import com.albin.todoapp.core.theme.TodoAppTheme
 
 @Composable
 fun TaskItem(
@@ -87,7 +87,7 @@ fun TaskItem(
                 }
                 task.category?.let {
                     Text(
-                        text = it.toString(),
+                        text = it.displayName,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -116,11 +116,17 @@ fun TaskItem(
     uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO,
 )
 fun TaskItemPreviewLight(
-    @PreviewParameter(TaskItemPreviewProvider::class) task: Task
+
 ) {
     TodoAppTheme {
         TaskItem(
-            task = task,
+            task = Task(
+                id = "1",
+                title = "Comprar micrófono",
+                description = "Recordatorio para compras pendientes",
+                category = Category.SHOPPING,
+                isCompleted = false
+            ),
             onClickItem = {},
             onDeleteItem = {},
             onToggleCompletion = {}
@@ -134,11 +140,17 @@ fun TaskItemPreviewLight(
     uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
 )
 fun TaskItemPreviewDark(
-    @PreviewParameter(TaskItemPreviewProvider::class) task: Task
+
 ) {
     TodoAppTheme {
         TaskItem(
-            task = task,
+            task = Task(
+                id = "1",
+                title = "Comprar micrófono",
+                description = "Recordatorio para compras pendientes",
+                category = Category.SHOPPING,
+                isCompleted = false
+            ),
             onClickItem = {},
             onDeleteItem = {},
             onToggleCompletion = {}
