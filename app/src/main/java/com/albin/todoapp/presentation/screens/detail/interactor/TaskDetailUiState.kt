@@ -1,7 +1,7 @@
 package com.albin.todoapp.presentation.screens.detail.interactor
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.albin.todoapp.core.mvi.UiState
+import com.albin.todoapp.core.handler.UiState
 import com.albin.todoapp.domain.Category
 import java.time.LocalDateTime
 

@@ -1,6 +1,6 @@
 package com.albin.todoapp.presentation.screens.home.interactor
 
-import com.albin.todoapp.core.mvi.UiIntent
+import com.albin.todoapp.core.handler.UiIntent
 import com.albin.todoapp.domain.Task
 
 sealed interface HomeUiIntent : UiIntent {

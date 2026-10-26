@@ -1,6 +1,6 @@
 package com.albin.todoapp.presentation.screens.assistant.interactor
 
-import com.albin.todoapp.core.mvi.UiState
+import com.albin.todoapp.core.handler.UiState
 import com.albin.todoapp.domain.ai.AiMessage
 import com.albin.todoapp.domain.ai.ModelState
 

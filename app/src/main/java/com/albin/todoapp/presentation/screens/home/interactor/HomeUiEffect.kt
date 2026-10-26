@@ -1,6 +1,6 @@
 package com.albin.todoapp.presentation.screens.home.interactor
 
-import com.albin.todoapp.core.mvi.UiEffect
+import com.albin.todoapp.core.handler.UiEffect
 
 sealed interface HomeUiEffect : UiEffect {
     data object UpdatedTask : HomeUiEffect

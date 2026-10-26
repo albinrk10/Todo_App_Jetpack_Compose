@@ -1,6 +1,6 @@
 package com.albin.todoapp.presentation.screens.detail.interactor
 
-import com.albin.todoapp.core.mvi.UiIntent
+import com.albin.todoapp.core.handler.UiIntent
 import com.albin.todoapp.domain.Category
 import java.time.LocalDateTime
 

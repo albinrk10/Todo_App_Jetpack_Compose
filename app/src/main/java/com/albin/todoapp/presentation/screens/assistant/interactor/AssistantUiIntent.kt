@@ -1,6 +1,6 @@
 package com.albin.todoapp.presentation.screens.assistant.interactor
 
-import com.albin.todoapp.core.mvi.UiIntent
+import com.albin.todoapp.core.handler.UiIntent
 
 sealed interface AssistantUiIntent : UiIntent {
     data class ChangeInputText(val text: String) : AssistantUiIntent
